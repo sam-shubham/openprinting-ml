@@ -45,7 +45,7 @@ jobs:
           rm -rf site
           mkdir -p site
           cp index.html site/
-          cp README.md site/
+          if [ -f README.md ]; then cp README.md site/; fi
           cp -R artifacts site/artifacts
 
       - name: Setup Pages
