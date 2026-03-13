@@ -1,595 +1,691 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>OpenPrinting Playground</title>
-  <style>
-    :root {
-      --bg: #f7f7f7;
-      --panel: #ffffff;
-      --line: #d9d9d9;
-      --text: #1f1f1f;
-      --muted: #666666;
-      --accent: #0b57d0;
-      --good: #1e7a34;
-    }
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>OpenPrinting Playground</title>
+    <style>
+      :root {
+        --bg: #f7f7f7;
+        --panel: #ffffff;
+        --line: #d9d9d9;
+        --text: #1f1f1f;
+        --muted: #666666;
+        --accent: #0b57d0;
+        --good: #1e7a34;
+      }
 
-    * {
-      box-sizing: border-box;
-    }
+      * {
+        box-sizing: border-box;
+      }
 
-    body {
-      margin: 0;
-      font: 14px/1.4 system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-      color: var(--text);
-      background: var(--bg);
-    }
+      body {
+        margin: 0;
+        font:
+          14px/1.4 system-ui,
+          -apple-system,
+          BlinkMacSystemFont,
+          "Segoe UI",
+          sans-serif;
+        color: var(--text);
+        background: var(--bg);
+      }
 
-    .page {
-      max-width: 1280px;
-      margin: 0 auto;
-      padding: 16px;
-    }
+      .page {
+        max-width: 1280px;
+        margin: 0 auto;
+        padding: 16px;
+      }
 
-    h1, h2, h3, p {
-      margin: 0;
-    }
+      h1,
+      h2,
+      h3,
+      p {
+        margin: 0;
+      }
 
-    .header,
-    .stats,
-    .filters,
-    .panel {
-      background: var(--panel);
-      border: 1px solid var(--line);
-      border-radius: 8px;
-    }
-
-    .header,
-    .filters,
-    .panel {
-      padding: 16px;
-    }
-
-    .header {
-      display: flex;
-      justify-content: space-between;
-      gap: 16px;
-      align-items: start;
-      margin-bottom: 16px;
-    }
-
-    .subtle {
-      color: var(--muted);
-    }
-
-    .stats {
-      display: grid;
-      grid-template-columns: repeat(5, minmax(0, 1fr));
-      gap: 1px;
-      overflow: hidden;
-      margin-bottom: 16px;
-    }
-
-    .stat {
-      padding: 16px;
-      background: var(--panel);
-    }
-
-    .stat-value {
-      font-size: 24px;
-      font-weight: 600;
-      margin-bottom: 4px;
-    }
-
-    .filters {
-      margin-bottom: 16px;
-      display: grid;
-      grid-template-columns: 2fr 1fr 1fr 1fr;
-      gap: 12px;
-    }
-
-    input,
-    select {
-      width: 100%;
-      padding: 10px 12px;
-      border: 1px solid var(--line);
-      border-radius: 6px;
-      background: #fff;
-      font: inherit;
-    }
-
-    .layout {
-      display: grid;
-      grid-template-columns: 380px minmax(0, 1fr);
-      gap: 16px;
-    }
-
-    .list {
-      max-height: 70vh;
-      overflow: auto;
-      display: grid;
-      gap: 8px;
-    }
-
-    .item {
-      width: 100%;
-      text-align: left;
-      border: 1px solid var(--line);
-      border-radius: 6px;
-      background: #fff;
-      padding: 12px;
-      cursor: pointer;
-    }
-
-    .item.active {
-      border-color: var(--accent);
-      background: #f4f8ff;
-    }
-
-    .item-title {
-      font-weight: 600;
-      margin-bottom: 4px;
-    }
-
-    .tags {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 6px;
-      margin-top: 8px;
-    }
-
-    .tag {
-      display: inline-block;
-      border: 1px solid var(--line);
-      border-radius: 999px;
-      padding: 2px 8px;
-      font-size: 12px;
-      color: var(--muted);
-      background: #fafafa;
-    }
-
-    .tag.good {
-      color: var(--good);
-      border-color: #b8d8c0;
-      background: #f2fbf4;
-    }
-
-    .detail {
-      display: grid;
-      gap: 16px;
-    }
-
-    .facts {
-      display: grid;
-      grid-template-columns: repeat(4, minmax(0, 1fr));
-      gap: 12px;
-    }
-
-    .fact {
-      border: 1px solid var(--line);
-      border-radius: 6px;
-      padding: 12px;
-      background: #fcfcfc;
-    }
-
-    .fact-label {
-      color: var(--muted);
-      font-size: 12px;
-      margin-bottom: 4px;
-    }
-
-    .fact-value {
-      font-weight: 600;
-    }
-
-    .recommendations {
-      display: grid;
-      gap: 8px;
-    }
-
-    .section {
-      display: grid;
-      gap: 8px;
-    }
-
-    .kv {
-      display: grid;
-      grid-template-columns: 180px minmax(0, 1fr);
-      gap: 8px 12px;
-      align-items: start;
-    }
-
-    .kv-key {
-      color: var(--muted);
-    }
-
-    .mono {
-      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
-      font-size: 12px;
-      word-break: break-all;
-    }
-
-    .recommendation {
-      border: 1px solid var(--line);
-      border-radius: 6px;
-      padding: 12px;
-      background: #fff;
-    }
-
-    .recommendation-top {
-      display: flex;
-      justify-content: space-between;
-      gap: 16px;
-      margin-bottom: 6px;
-    }
-
-    .score {
-      color: var(--accent);
-      font-weight: 600;
-    }
-
-    .confidence {
-      font-size: 12px;
-      color: var(--muted);
-    }
-
-    .empty {
-      color: var(--muted);
-    }
-
-    @media (max-width: 960px) {
+      .header,
       .stats,
       .filters,
-      .layout,
-      .facts {
-        grid-template-columns: 1fr;
+      .panel {
+        background: var(--panel);
+        border: 1px solid var(--line);
+        border-radius: 8px;
+      }
+
+      .header,
+      .filters,
+      .panel {
+        padding: 16px;
       }
 
       .header {
-        flex-direction: column;
+        display: flex;
+        justify-content: space-between;
+        gap: 16px;
+        align-items: start;
+        margin-bottom: 16px;
       }
-    }
-  </style>
-</head>
-<body>
-  <div class="page">
-    <section class="header">
-      <div>
-        <h1>OpenPrinting Playground</h1>
-        <p class="subtle">Simple reviewer page for the generated printer dataset and recommendation artifacts.</p>
-      </div>
-      <div class="subtle">
-        <div>Pipeline: <strong id="pipelineVersion">Loading</strong></div>
-        <div>Generated: <strong id="generatedAt">Loading</strong></div>
-      </div>
-    </section>
 
-    <section class="stats">
-      <div class="stat">
-        <div class="stat-value" id="statPrinters">-</div>
-        <div class="subtle">Printers</div>
-      </div>
-      <div class="stat">
-        <div class="stat-value" id="statDriverless">-</div>
-        <div class="subtle">Matched Both</div>
-      </div>
-      <div class="stat">
-        <div class="stat-value" id="statDrivers">-</div>
-        <div class="subtle">Legacy Supported</div>
-      </div>
-      <div class="stat">
-        <div class="stat-value" id="statIpp">-</div>
-        <div class="subtle">IPP Everywhere</div>
-      </div>
-      <div class="stat">
-        <div class="stat-value" id="statColor">-</div>
-        <div class="subtle">Driverless Supported</div>
-      </div>
-    </section>
+      .subtle {
+        color: var(--muted);
+      }
 
-    <section class="filters">
-      <input id="searchInput" type="search" placeholder="Search manufacturer, model, driver, notes">
-      <select id="supportFilter">
-        <option value="all">All support paths</option>
-        <option value="both">Both legacy and driverless</option>
-        <option value="driverless-only">Driverless only</option>
-        <option value="legacy-only">Legacy only</option>
-      </select>
-      <select id="typeFilter">
-        <option value="all">All printer types</option>
-      </select>
-      <select id="colorFilter">
-        <option value="all">All color modes</option>
-        <option value="color">Color only</option>
-        <option value="mono">Mono only</option>
-      </select>
-    </section>
+      .stats {
+        display: grid;
+        grid-template-columns: repeat(5, minmax(0, 1fr));
+        gap: 1px;
+        overflow: hidden;
+        margin-bottom: 16px;
+      }
 
-    <section class="layout">
-      <div class="panel">
-        <div class="subtle" id="resultCount">Loading printers</div>
-        <div class="list" id="printerList"></div>
-      </div>
+      .stat {
+        padding: 16px;
+        background: var(--panel);
+      }
 
-      <div class="panel detail" id="detailPanel">
-        <div class="empty">Select a printer.</div>
-      </div>
-    </section>
+      .stat-value {
+        font-size: 24px;
+        font-weight: 600;
+        margin-bottom: 4px;
+      }
 
-    <section class="panel" id="errorBox" hidden style="margin-top: 16px;"></section>
-  </div>
+      .filters {
+        margin-bottom: 16px;
+        display: grid;
+        grid-template-columns: 2fr 1fr 1fr 1fr;
+        gap: 12px;
+      }
 
-  <script>
-    const REPO_BASE = "/openprinting-printer-ml/";
+      input,
+      select {
+        width: 100%;
+        padding: 10px 12px;
+        border: 1px solid var(--line);
+        border-radius: 6px;
+        background: #fff;
+        font: inherit;
+      }
 
-    const state = {
-      metadata: null,
-      printers: [],
-      recommendations: {},
-      filtered: [],
-      selectedId: null,
-      printerMap: new Map(),
-    };
+      .layout {
+        display: grid;
+        grid-template-columns: 380px minmax(0, 1fr);
+        gap: 16px;
+      }
 
-    const els = {
-      pipelineVersion: document.getElementById("pipelineVersion"),
-      generatedAt: document.getElementById("generatedAt"),
-      statPrinters: document.getElementById("statPrinters"),
-      statDriverless: document.getElementById("statDriverless"),
-      statDrivers: document.getElementById("statDrivers"),
-      statIpp: document.getElementById("statIpp"),
-      statColor: document.getElementById("statColor"),
-      resultCount: document.getElementById("resultCount"),
-      printerList: document.getElementById("printerList"),
-      detailPanel: document.getElementById("detailPanel"),
-      searchInput: document.getElementById("searchInput"),
-      supportFilter: document.getElementById("supportFilter"),
-      typeFilter: document.getElementById("typeFilter"),
-      colorFilter: document.getElementById("colorFilter"),
-      errorBox: document.getElementById("errorBox"),
-    };
+      .list {
+        max-height: 70vh;
+        overflow: auto;
+        display: grid;
+        gap: 8px;
+      }
 
-    async function loadData() {
-      try {
-        const assetPath = (path) => {
-          const clean = path.replace(/^\/+/, "");
-          const isGithubPages = window.location.hostname.endsWith("github.io");
-          const isLocal = ["localhost", "127.0.0.1"].includes(window.location.hostname) || window.location.protocol === "file:";
-          if (isGithubPages) return `${REPO_BASE}${clean}`;
-          if (isLocal) return clean;
-          return `${REPO_BASE}${clean}`;
+      .item {
+        width: 100%;
+        text-align: left;
+        border: 1px solid var(--line);
+        border-radius: 6px;
+        background: #fff;
+        padding: 12px;
+        cursor: pointer;
+      }
+
+      .item.active {
+        border-color: var(--accent);
+        background: #f4f8ff;
+      }
+
+      .item-title {
+        font-weight: 600;
+        margin-bottom: 4px;
+      }
+
+      .tags {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 6px;
+        margin-top: 8px;
+      }
+
+      .tag {
+        display: inline-block;
+        border: 1px solid var(--line);
+        border-radius: 999px;
+        padding: 2px 8px;
+        font-size: 12px;
+        color: var(--muted);
+        background: #fafafa;
+      }
+
+      .tag.good {
+        color: var(--good);
+        border-color: #b8d8c0;
+        background: #f2fbf4;
+      }
+
+      .detail {
+        display: grid;
+        gap: 16px;
+      }
+
+      .facts {
+        display: grid;
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+        gap: 12px;
+      }
+
+      .fact {
+        border: 1px solid var(--line);
+        border-radius: 6px;
+        padding: 12px;
+        background: #fcfcfc;
+      }
+
+      .fact-label {
+        color: var(--muted);
+        font-size: 12px;
+        margin-bottom: 4px;
+      }
+
+      .fact-value {
+        font-weight: 600;
+      }
+
+      .recommendations {
+        display: grid;
+        gap: 8px;
+      }
+
+      .section {
+        display: grid;
+        gap: 8px;
+      }
+
+      .kv {
+        display: grid;
+        grid-template-columns: 180px minmax(0, 1fr);
+        gap: 8px 12px;
+        align-items: start;
+      }
+
+      .kv-key {
+        color: var(--muted);
+      }
+
+      .mono {
+        font-family:
+          ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+        font-size: 12px;
+        word-break: break-all;
+      }
+
+      .recommendation {
+        border: 1px solid var(--line);
+        border-radius: 6px;
+        padding: 12px;
+        background: #fff;
+      }
+
+      .recommendation-top {
+        display: flex;
+        justify-content: space-between;
+        gap: 16px;
+        margin-bottom: 6px;
+      }
+
+      .score {
+        color: var(--accent);
+        font-weight: 600;
+      }
+
+      .confidence {
+        font-size: 12px;
+        color: var(--muted);
+      }
+
+      .empty {
+        color: var(--muted);
+      }
+
+      @media (max-width: 960px) {
+        .stats,
+        .filters,
+        .layout,
+        .facts {
+          grid-template-columns: 1fr;
+        }
+
+        .header {
+          flex-direction: column;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="page">
+      <section class="header">
+        <div>
+          <h1>OpenPrinting Playground</h1>
+          <p class="subtle">
+            Simple reviewer page for the generated printer dataset and
+            recommendation artifacts.
+          </p>
+        </div>
+        <div class="subtle">
+          <div>Pipeline: <strong id="pipelineVersion">Loading</strong></div>
+          <div>Generated: <strong id="generatedAt">Loading</strong></div>
+        </div>
+      </section>
+
+      <section class="stats">
+        <div class="stat">
+          <div class="stat-value" id="statPrinters">-</div>
+          <div class="subtle">Printers</div>
+        </div>
+        <div class="stat">
+          <div class="stat-value" id="statDriverless">-</div>
+          <div class="subtle">Matched Both</div>
+        </div>
+        <div class="stat">
+          <div class="stat-value" id="statDrivers">-</div>
+          <div class="subtle">Legacy Supported</div>
+        </div>
+        <div class="stat">
+          <div class="stat-value" id="statIpp">-</div>
+          <div class="subtle">IPP Everywhere</div>
+        </div>
+        <div class="stat">
+          <div class="stat-value" id="statColor">-</div>
+          <div class="subtle">Driverless Supported</div>
+        </div>
+      </section>
+
+      <section class="filters">
+        <input
+          id="searchInput"
+          type="search"
+          placeholder="Search manufacturer, model, driver, notes"
+        />
+        <select id="supportFilter">
+          <option value="all">All support paths</option>
+          <option value="both">Both legacy and driverless</option>
+          <option value="driverless-only">Driverless only</option>
+          <option value="legacy-only">Legacy only</option>
+        </select>
+        <select id="typeFilter">
+          <option value="all">All printer types</option>
+        </select>
+        <select id="colorFilter">
+          <option value="all">All color modes</option>
+          <option value="color">Color only</option>
+          <option value="mono">Mono only</option>
+        </select>
+      </section>
+
+      <section class="layout">
+        <div class="panel">
+          <div class="subtle" id="resultCount">Loading printers</div>
+          <div class="list" id="printerList"></div>
+        </div>
+
+        <div class="panel detail" id="detailPanel">
+          <div class="empty">Select a printer.</div>
+        </div>
+      </section>
+
+      <section
+        class="panel"
+        id="errorBox"
+        hidden
+        style="margin-top: 16px"
+      ></section>
+    </div>
+
+    <script>
+      const REPO_BASE = "/openprinting-ml/";
+
+      const state = {
+        metadata: null,
+        printers: [],
+        recommendations: {},
+        filtered: [],
+        selectedId: null,
+        printerMap: new Map(),
+      };
+
+      const els = {
+        pipelineVersion: document.getElementById("pipelineVersion"),
+        generatedAt: document.getElementById("generatedAt"),
+        statPrinters: document.getElementById("statPrinters"),
+        statDriverless: document.getElementById("statDriverless"),
+        statDrivers: document.getElementById("statDrivers"),
+        statIpp: document.getElementById("statIpp"),
+        statColor: document.getElementById("statColor"),
+        resultCount: document.getElementById("resultCount"),
+        printerList: document.getElementById("printerList"),
+        detailPanel: document.getElementById("detailPanel"),
+        searchInput: document.getElementById("searchInput"),
+        supportFilter: document.getElementById("supportFilter"),
+        typeFilter: document.getElementById("typeFilter"),
+        colorFilter: document.getElementById("colorFilter"),
+        errorBox: document.getElementById("errorBox"),
+      };
+
+      async function loadData() {
+        try {
+          const assetPath = (path) => {
+            const clean = path.replace(/^\/+/, "");
+            const isGithubPages =
+              window.location.hostname.endsWith("github.io");
+            const isLocal =
+              ["localhost", "127.0.0.1"].includes(window.location.hostname) ||
+              window.location.protocol === "file:";
+            if (isGithubPages) return `${REPO_BASE}${clean}`;
+            if (isLocal) return clean;
+            return `${REPO_BASE}${clean}`;
+          };
+
+          const [metadata, printers, recommendations] = await Promise.all([
+            fetch(assetPath("artifacts/metadata.json")).then((res) =>
+              res.json(),
+            ),
+            fetch(assetPath("artifacts/printers.json")).then((res) =>
+              res.json(),
+            ),
+            fetch(assetPath("artifacts/combined_recommendations.json")).then(
+              (res) => res.json(),
+            ),
+          ]);
+
+          state.metadata = metadata;
+          state.printers = printers.sort((a, b) =>
+            a.canonical_name.localeCompare(b.canonical_name),
+          );
+          state.recommendations = recommendations;
+          state.printerMap = new Map(
+            state.printers.map((printer) => [printer.id, printer]),
+          );
+          state.selectedId = state.printers[0]?.id || null;
+
+          populateTypeFilter();
+          renderSummary();
+          applyFilters();
+        } catch (error) {
+          els.errorBox.hidden = false;
+          els.errorBox.textContent =
+            "Could not load artifact JSON. Serve this directory with `python3 -m http.server` and open index.html through localhost.";
+          console.error(error);
+        }
+      }
+
+      function populateTypeFilter() {
+        const types = [
+          ...new Set(state.printers.map((printer) => printer.type)),
+        ].sort();
+        for (const type of types) {
+          const option = document.createElement("option");
+          option.value = type;
+          option.textContent = type;
+          els.typeFilter.appendChild(option);
+        }
+      }
+
+      function renderSummary() {
+        const meta = state.metadata;
+        els.pipelineVersion.textContent = meta.pipeline_version;
+        els.generatedAt.textContent = new Date(
+          meta.generated_at,
+        ).toLocaleString();
+        els.statPrinters.textContent = meta.printer_count.toLocaleString();
+        els.statDriverless.textContent =
+          meta.both_supported_count.toLocaleString();
+        els.statDrivers.textContent =
+          meta.legacy_supported_count.toLocaleString();
+        els.statIpp.textContent = state.printers
+          .filter((printer) => printer.ipp_everywhere)
+          .length.toLocaleString();
+        els.statColor.textContent =
+          meta.driverless_capable_count.toLocaleString();
+      }
+
+      function normalizeForSearch(value) {
+        return (value || "").toLowerCase().replace(/[^a-z0-9]+/g, "");
+      }
+
+      function tokenizeQuery(value) {
+        return (value || "")
+          .toLowerCase()
+          .split(/[^a-z0-9]+/)
+          .map((token) => token.trim())
+          .filter(Boolean);
+      }
+
+      function buildSearchFields(printer) {
+        return {
+          canonical: (printer.canonical_name || "").toLowerCase(),
+          manufacturerDisplay: (
+            printer.manufacturer_display || ""
+          ).toLowerCase(),
+          manufacturer: (printer.manufacturer || "").toLowerCase(),
+          model: (printer.model || "").toLowerCase(),
+          id: (printer.id || "").toLowerCase(),
+          recommendedDriver: (printer.recommended_driver || "").toLowerCase(),
+          notes: (printer.notes || "").toLowerCase(),
+          languages: printer.languages.join(" ").toLowerCase(),
+          protocols: [
+            printer.legacy_supported
+              ? "legacy driver based driver supported"
+              : "no legacy support",
+            printer.driverless_supported
+              ? "driverless driverless supported"
+              : "no driverless support",
+            printer.support_summary || "",
+            printer.airprint ? "airprint air print" : "",
+            printer.ipp_everywhere ? "ipp everywhere ippeverywhere" : "",
+            printer.color ? "color colour" : "mono monochrome",
+          ]
+            .join(" ")
+            .toLowerCase(),
+        };
+      }
+
+      function computeSearchScore(printer, query, normalizedQuery) {
+        if (!query) return 0;
+
+        const fields = buildSearchFields(printer);
+        const tokens = tokenizeQuery(query);
+        const normalized = {
+          canonical: normalizeForSearch(fields.canonical),
+          manufacturerDisplay: normalizeForSearch(fields.manufacturerDisplay),
+          manufacturer: normalizeForSearch(fields.manufacturer),
+          model: normalizeForSearch(fields.model),
+          id: normalizeForSearch(fields.id),
+          recommendedDriver: normalizeForSearch(fields.recommendedDriver),
+          notes: normalizeForSearch(fields.notes),
+          languages: normalizeForSearch(fields.languages),
+          protocols: normalizeForSearch(fields.protocols),
         };
 
-        const [metadata, printers, recommendations] = await Promise.all([
-          fetch(assetPath("artifacts/metadata.json")).then((res) => res.json()),
-          fetch(assetPath("artifacts/printers.json")).then((res) => res.json()),
-          fetch(assetPath("artifacts/combined_recommendations.json")).then((res) => res.json()),
-        ]);
+        let score = 0;
 
-        state.metadata = metadata;
-        state.printers = printers.sort((a, b) => a.canonical_name.localeCompare(b.canonical_name));
-        state.recommendations = recommendations;
-        state.printerMap = new Map(state.printers.map((printer) => [printer.id, printer]));
-        state.selectedId = state.printers[0]?.id || null;
+        if (fields.canonical === query) score += 2000;
+        if (`${fields.manufacturerDisplay} ${fields.model}`.trim() === query)
+          score += 1800;
+        if (fields.id === query) score += 1700;
 
-        populateTypeFilter();
-        renderSummary();
-        applyFilters();
-      } catch (error) {
-        els.errorBox.hidden = false;
-        els.errorBox.textContent =
-          "Could not load artifact JSON. Serve this directory with `python3 -m http.server` and open index.html through localhost.";
-        console.error(error);
-      }
-    }
+        if (normalized.canonical === normalizedQuery) score += 1600;
+        if (normalized.id === normalizedQuery) score += 1500;
+        if (normalized.model === normalizedQuery) score += 1450;
 
-    function populateTypeFilter() {
-      const types = [...new Set(state.printers.map((printer) => printer.type))].sort();
-      for (const type of types) {
-        const option = document.createElement("option");
-        option.value = type;
-        option.textContent = type;
-        els.typeFilter.appendChild(option);
-      }
-    }
+        if (fields.canonical.startsWith(query)) score += 1200;
+        if (fields.model.startsWith(query)) score += 1100;
+        if (fields.manufacturerDisplay.startsWith(query)) score += 950;
+        if (fields.id.startsWith(query)) score += 900;
 
-    function renderSummary() {
-      const meta = state.metadata;
-      els.pipelineVersion.textContent = meta.pipeline_version;
-      els.generatedAt.textContent = new Date(meta.generated_at).toLocaleString();
-      els.statPrinters.textContent = meta.printer_count.toLocaleString();
-      els.statDriverless.textContent = meta.both_supported_count.toLocaleString();
-      els.statDrivers.textContent = meta.legacy_supported_count.toLocaleString();
-      els.statIpp.textContent = state.printers.filter((printer) => printer.ipp_everywhere).length.toLocaleString();
-      els.statColor.textContent = meta.driverless_capable_count.toLocaleString();
-    }
+        if (normalized.canonical.startsWith(normalizedQuery)) score += 850;
+        if (normalized.model.startsWith(normalizedQuery)) score += 800;
 
-    function normalizeForSearch(value) {
-      return (value || "").toLowerCase().replace(/[^a-z0-9]+/g, "");
-    }
+        if (fields.canonical.includes(query)) score += 600;
+        if (fields.model.includes(query)) score += 520;
+        if (fields.manufacturerDisplay.includes(query)) score += 480;
+        if (fields.manufacturer.includes(query)) score += 460;
+        if (fields.id.includes(query)) score += 430;
+        if (fields.recommendedDriver.includes(query)) score += 360;
+        if (fields.protocols.includes(query)) score += 320;
+        if (fields.languages.includes(query)) score += 180;
+        if (fields.notes.includes(query)) score += 60;
 
-    function tokenizeQuery(value) {
-      return (value || "")
-        .toLowerCase()
-        .split(/[^a-z0-9]+/)
-        .map((token) => token.trim())
-        .filter(Boolean);
-    }
+        if (normalized.recommendedDriver.includes(normalizedQuery))
+          score += 280;
+        if (normalized.protocols.includes(normalizedQuery)) score += 240;
+        if (normalized.notes.includes(normalizedQuery)) score += 30;
 
-    function buildSearchFields(printer) {
-      return {
-        canonical: (printer.canonical_name || "").toLowerCase(),
-        manufacturerDisplay: (printer.manufacturer_display || "").toLowerCase(),
-        manufacturer: (printer.manufacturer || "").toLowerCase(),
-        model: (printer.model || "").toLowerCase(),
-        id: (printer.id || "").toLowerCase(),
-        recommendedDriver: (printer.recommended_driver || "").toLowerCase(),
-        notes: (printer.notes || "").toLowerCase(),
-        languages: printer.languages.join(" ").toLowerCase(),
-        protocols: [
-          printer.legacy_supported ? "legacy driver based driver supported" : "no legacy support",
-          printer.driverless_supported ? "driverless driverless supported" : "no driverless support",
-          printer.support_summary || "",
-          printer.airprint ? "airprint air print" : "",
-          printer.ipp_everywhere ? "ipp everywhere ippeverywhere" : "",
-          printer.color ? "color colour" : "mono monochrome",
-        ].join(" ").toLowerCase(),
-      };
-    }
+        if (
+          printer.manufacturer_display &&
+          query === printer.manufacturer_display.toLowerCase()
+        )
+          score += 500;
+        if (
+          printer.manufacturer &&
+          query === printer.manufacturer.toLowerCase()
+        )
+          score += 500;
 
-    function computeSearchScore(printer, query, normalizedQuery) {
-      if (!query) return 0;
+        let matchedTokens = 0;
+        for (const token of tokens) {
+          const normalizedToken = normalizeForSearch(token);
+          let tokenScore = 0;
 
-      const fields = buildSearchFields(printer);
-      const tokens = tokenizeQuery(query);
-      const normalized = {
-        canonical: normalizeForSearch(fields.canonical),
-        manufacturerDisplay: normalizeForSearch(fields.manufacturerDisplay),
-        manufacturer: normalizeForSearch(fields.manufacturer),
-        model: normalizeForSearch(fields.model),
-        id: normalizeForSearch(fields.id),
-        recommendedDriver: normalizeForSearch(fields.recommendedDriver),
-        notes: normalizeForSearch(fields.notes),
-        languages: normalizeForSearch(fields.languages),
-        protocols: normalizeForSearch(fields.protocols),
-      };
-
-      let score = 0;
-
-      if (fields.canonical === query) score += 2000;
-      if (`${fields.manufacturerDisplay} ${fields.model}`.trim() === query) score += 1800;
-      if (fields.id === query) score += 1700;
-
-      if (normalized.canonical === normalizedQuery) score += 1600;
-      if (normalized.id === normalizedQuery) score += 1500;
-      if (normalized.model === normalizedQuery) score += 1450;
-
-      if (fields.canonical.startsWith(query)) score += 1200;
-      if (fields.model.startsWith(query)) score += 1100;
-      if (fields.manufacturerDisplay.startsWith(query)) score += 950;
-      if (fields.id.startsWith(query)) score += 900;
-
-      if (normalized.canonical.startsWith(normalizedQuery)) score += 850;
-      if (normalized.model.startsWith(normalizedQuery)) score += 800;
-
-      if (fields.canonical.includes(query)) score += 600;
-      if (fields.model.includes(query)) score += 520;
-      if (fields.manufacturerDisplay.includes(query)) score += 480;
-      if (fields.manufacturer.includes(query)) score += 460;
-      if (fields.id.includes(query)) score += 430;
-      if (fields.recommendedDriver.includes(query)) score += 360;
-      if (fields.protocols.includes(query)) score += 320;
-      if (fields.languages.includes(query)) score += 180;
-      if (fields.notes.includes(query)) score += 60;
-
-      if (normalized.recommendedDriver.includes(normalizedQuery)) score += 280;
-      if (normalized.protocols.includes(normalizedQuery)) score += 240;
-      if (normalized.notes.includes(normalizedQuery)) score += 30;
-
-      if (printer.manufacturer_display && query === printer.manufacturer_display.toLowerCase()) score += 500;
-      if (printer.manufacturer && query === printer.manufacturer.toLowerCase()) score += 500;
-
-      let matchedTokens = 0;
-      for (const token of tokens) {
-        const normalizedToken = normalizeForSearch(token);
-        let tokenScore = 0;
-
-        if (fields.manufacturerDisplay === token || fields.manufacturer === token) tokenScore = Math.max(tokenScore, 260);
-        if (fields.model === token) tokenScore = Math.max(tokenScore, 260);
-        if (fields.canonical.includes(token)) tokenScore = Math.max(tokenScore, 180);
-        if (fields.model.includes(token)) tokenScore = Math.max(tokenScore, 190);
-        if (fields.manufacturerDisplay.includes(token) || fields.manufacturer.includes(token)) {
-          tokenScore = Math.max(tokenScore, 170);
-        }
-        if (fields.id.includes(token)) tokenScore = Math.max(tokenScore, 140);
-        if (fields.protocols.includes(token)) tokenScore = Math.max(tokenScore, 130);
-        if (fields.recommendedDriver.includes(token)) tokenScore = Math.max(tokenScore, 110);
-        if (fields.languages.includes(token)) tokenScore = Math.max(tokenScore, 90);
-        if (fields.notes.includes(token)) tokenScore = Math.max(tokenScore, 20);
-
-        if (!tokenScore && normalizedToken) {
-          if (normalized.canonical.includes(normalizedToken)) tokenScore = Math.max(tokenScore, 175);
-          if (normalized.model.includes(normalizedToken)) tokenScore = Math.max(tokenScore, 185);
-          if (normalized.manufacturerDisplay.includes(normalizedToken) || normalized.manufacturer.includes(normalizedToken)) {
-            tokenScore = Math.max(tokenScore, 165);
+          if (
+            fields.manufacturerDisplay === token ||
+            fields.manufacturer === token
+          )
+            tokenScore = Math.max(tokenScore, 260);
+          if (fields.model === token) tokenScore = Math.max(tokenScore, 260);
+          if (fields.canonical.includes(token))
+            tokenScore = Math.max(tokenScore, 180);
+          if (fields.model.includes(token))
+            tokenScore = Math.max(tokenScore, 190);
+          if (
+            fields.manufacturerDisplay.includes(token) ||
+            fields.manufacturer.includes(token)
+          ) {
+            tokenScore = Math.max(tokenScore, 170);
           }
-          if (normalized.id.includes(normalizedToken)) tokenScore = Math.max(tokenScore, 135);
-          if (normalized.protocols.includes(normalizedToken)) tokenScore = Math.max(tokenScore, 120);
-          if (normalized.recommendedDriver.includes(normalizedToken)) tokenScore = Math.max(tokenScore, 100);
-          if (normalized.languages.includes(normalizedToken)) tokenScore = Math.max(tokenScore, 80);
-          if (normalized.notes.includes(normalizedToken)) tokenScore = Math.max(tokenScore, 15);
+          if (fields.id.includes(token)) tokenScore = Math.max(tokenScore, 140);
+          if (fields.protocols.includes(token))
+            tokenScore = Math.max(tokenScore, 130);
+          if (fields.recommendedDriver.includes(token))
+            tokenScore = Math.max(tokenScore, 110);
+          if (fields.languages.includes(token))
+            tokenScore = Math.max(tokenScore, 90);
+          if (fields.notes.includes(token))
+            tokenScore = Math.max(tokenScore, 20);
+
+          if (!tokenScore && normalizedToken) {
+            if (normalized.canonical.includes(normalizedToken))
+              tokenScore = Math.max(tokenScore, 175);
+            if (normalized.model.includes(normalizedToken))
+              tokenScore = Math.max(tokenScore, 185);
+            if (
+              normalized.manufacturerDisplay.includes(normalizedToken) ||
+              normalized.manufacturer.includes(normalizedToken)
+            ) {
+              tokenScore = Math.max(tokenScore, 165);
+            }
+            if (normalized.id.includes(normalizedToken))
+              tokenScore = Math.max(tokenScore, 135);
+            if (normalized.protocols.includes(normalizedToken))
+              tokenScore = Math.max(tokenScore, 120);
+            if (normalized.recommendedDriver.includes(normalizedToken))
+              tokenScore = Math.max(tokenScore, 100);
+            if (normalized.languages.includes(normalizedToken))
+              tokenScore = Math.max(tokenScore, 80);
+            if (normalized.notes.includes(normalizedToken))
+              tokenScore = Math.max(tokenScore, 15);
+          }
+
+          if (tokenScore > 0) {
+            matchedTokens += 1;
+            score += tokenScore;
+          }
         }
 
-        if (tokenScore > 0) {
-          matchedTokens += 1;
-          score += tokenScore;
+        if (tokens.length > 1) {
+          if (matchedTokens === tokens.length) {
+            score += 420;
+          } else if (matchedTokens >= Math.ceil(tokens.length / 2)) {
+            score += 120;
+          } else {
+            score = 0;
+          }
         }
+
+        return score;
       }
 
-      if (tokens.length > 1) {
-        if (matchedTokens === tokens.length) {
-          score += 420;
-        } else if (matchedTokens >= Math.ceil(tokens.length / 2)) {
-          score += 120;
-        } else {
-          score = 0;
+      function applyFilters() {
+        const query = els.searchInput.value.trim().toLowerCase();
+        const normalizedQuery = query.replace(/\s+/g, "");
+        const supportFilter = els.supportFilter.value;
+        const typeFilter = els.typeFilter.value;
+        const colorFilter = els.colorFilter.value;
+
+        const ranked = [];
+
+        for (const printer of state.printers) {
+          if (
+            supportFilter !== "all" &&
+            printer.support_summary !== supportFilter
+          )
+            continue;
+          if (typeFilter !== "all" && printer.type !== typeFilter) continue;
+          if (colorFilter === "color" && !printer.color) continue;
+          if (colorFilter === "mono" && printer.color) continue;
+
+          const searchScore = query
+            ? computeSearchScore(printer, query, normalizedQuery)
+            : 0;
+          if (query && searchScore <= 0) continue;
+
+          ranked.push({ printer, searchScore });
         }
+
+        ranked.sort((a, b) => {
+          if (b.searchScore !== a.searchScore)
+            return b.searchScore - a.searchScore;
+          return a.printer.canonical_name.localeCompare(
+            b.printer.canonical_name,
+          );
+        });
+
+        state.filtered = ranked.map((entry) => entry.printer);
+
+        if (
+          !state.filtered.some((printer) => printer.id === state.selectedId)
+        ) {
+          state.selectedId = state.filtered[0]?.id || null;
+        }
+
+        renderList();
+        renderDetail();
       }
 
-      return score;
-    }
+      function renderList() {
+        els.printerList.innerHTML = "";
+        els.resultCount.textContent = `${state.filtered.length.toLocaleString()} printers`;
 
-    function applyFilters() {
-      const query = els.searchInput.value.trim().toLowerCase();
-      const normalizedQuery = query.replace(/\s+/g, "");
-      const supportFilter = els.supportFilter.value;
-      const typeFilter = els.typeFilter.value;
-      const colorFilter = els.colorFilter.value;
+        if (!state.filtered.length) {
+          els.printerList.innerHTML =
+            '<div class="empty">No printers match the current filters.</div>';
+          return;
+        }
 
-      const ranked = [];
-
-      for (const printer of state.printers) {
-        if (supportFilter !== "all" && printer.support_summary !== supportFilter) continue;
-        if (typeFilter !== "all" && printer.type !== typeFilter) continue;
-        if (colorFilter === "color" && !printer.color) continue;
-        if (colorFilter === "mono" && printer.color) continue;
-
-        const searchScore = query ? computeSearchScore(printer, query, normalizedQuery) : 0;
-        if (query && searchScore <= 0) continue;
-
-        ranked.push({ printer, searchScore });
-      }
-
-      ranked.sort((a, b) => {
-        if (b.searchScore !== a.searchScore) return b.searchScore - a.searchScore;
-        return a.printer.canonical_name.localeCompare(b.printer.canonical_name);
-      });
-
-      state.filtered = ranked.map((entry) => entry.printer);
-
-      if (!state.filtered.some((printer) => printer.id === state.selectedId)) {
-        state.selectedId = state.filtered[0]?.id || null;
-      }
-
-      renderList();
-      renderDetail();
-    }
-
-    function renderList() {
-      els.printerList.innerHTML = "";
-      els.resultCount.textContent = `${state.filtered.length.toLocaleString()} printers`;
-
-      if (!state.filtered.length) {
-        els.printerList.innerHTML = '<div class="empty">No printers match the current filters.</div>';
-        return;
-      }
-
-      for (const printer of state.filtered.slice(0, 250)) {
-        const button = document.createElement("button");
-        button.type = "button";
-        button.className = `item${printer.id === state.selectedId ? " active" : ""}`;
-        button.innerHTML = `
+        for (const printer of state.filtered.slice(0, 250)) {
+          const button = document.createElement("button");
+          button.type = "button";
+          button.className = `item${printer.id === state.selectedId ? " active" : ""}`;
+          button.innerHTML = `
           <div class="item-title">${printer.canonical_name}</div>
           <div class="subtle">${printer.type} · ${printer.support_summary} · functionality ${printer.functionality}</div>
           <div class="confidence">record confidence: ${formatConfidence(recordConfidenceFor(printer.id))}</div>
@@ -601,27 +697,30 @@
             ${printer.color ? '<span class="tag">color</span>' : '<span class="tag">mono</span>'}
           </div>
         `;
-        button.addEventListener("click", () => {
-          state.selectedId = printer.id;
-          renderList();
-          renderDetail();
-        });
-        els.printerList.appendChild(button);
-      }
-    }
-
-    function renderDetail() {
-      const printer = state.printerMap.get(state.selectedId);
-      if (!printer) {
-        els.detailPanel.innerHTML = '<div class="empty">Select a printer.</div>';
-        return;
+          button.addEventListener("click", () => {
+            state.selectedId = printer.id;
+            renderList();
+            renderDetail();
+          });
+          els.printerList.appendChild(button);
+        }
       }
 
-      const recs = state.recommendations[printer.id]?.recommendations || [];
-      const recordConfidence = state.recommendations[printer.id]?.record_confidence;
-      const recordConfidenceLabel = state.recommendations[printer.id]?.record_confidence_label;
+      function renderDetail() {
+        const printer = state.printerMap.get(state.selectedId);
+        if (!printer) {
+          els.detailPanel.innerHTML =
+            '<div class="empty">Select a printer.</div>';
+          return;
+        }
 
-      els.detailPanel.innerHTML = `
+        const recs = state.recommendations[printer.id]?.recommendations || [];
+        const recordConfidence =
+          state.recommendations[printer.id]?.record_confidence;
+        const recordConfidenceLabel =
+          state.recommendations[printer.id]?.record_confidence_label;
+
+        els.detailPanel.innerHTML = `
         <div>
           <h2>${printer.canonical_name}</h2>
           <div class="subtle">${printer.id}</div>
@@ -690,8 +789,8 @@
             <div class="mono">${printer.normalized_make_model}</div>
             <div class="kv-key">Source Presence</div>
             <div>
-              ${printer.source_presence?.foomatic ? '<span class="tag">foomatic</span>' : ''}
-              ${printer.source_presence?.driverless ? '<span class="tag good">driverless list</span>' : ''}
+              ${printer.source_presence?.foomatic ? '<span class="tag">foomatic</span>' : ""}
+              ${printer.source_presence?.driverless ? '<span class="tag good">driverless list</span>' : ""}
             </div>
             <div class="kv-key">Driver Count</div>
             <div>${printer.drivers.length}</div>
@@ -708,10 +807,10 @@
           </div>
         </div>
       `;
-    }
+      }
 
-    function renderRecommendation(item) {
-      return `
+      function renderRecommendation(item) {
+        return `
         <div class="recommendation">
           <div class="recommendation-top">
             <div>
@@ -722,32 +821,37 @@
             <div class="score">${item.score.toFixed(3)}</div>
           </div>
           <div class="tags">
-            ${item.legacy_supported ? '<span class="tag">legacy</span>' : ''}
-            ${item.driverless_supported ? '<span class="tag good">driverless</span>' : ''}
-            ${item.airprint ? '<span class="tag">airprint</span>' : ''}
-            ${item.ipp_everywhere ? '<span class="tag">ipp everywhere</span>' : ''}
+            ${item.legacy_supported ? '<span class="tag">legacy</span>' : ""}
+            ${item.driverless_supported ? '<span class="tag good">driverless</span>' : ""}
+            ${item.airprint ? '<span class="tag">airprint</span>' : ""}
+            ${item.ipp_everywhere ? '<span class="tag">ipp everywhere</span>' : ""}
             <span class="tag">${item.support_summary}</span>
             ${item.recommended_driver ? `<span class="tag">${item.recommended_driver}</span>` : ""}
           </div>
         </div>
       `;
-    }
+      }
 
-    function recordConfidenceFor(id) {
-      return state.recommendations[id]?.record_confidence;
-    }
+      function recordConfidenceFor(id) {
+        return state.recommendations[id]?.record_confidence;
+      }
 
-    function formatConfidence(value) {
-      if (typeof value !== "number") return "n/a";
-      return value.toFixed(3);
-    }
+      function formatConfidence(value) {
+        if (typeof value !== "number") return "n/a";
+        return value.toFixed(3);
+      }
 
-    for (const el of [els.searchInput, els.supportFilter, els.typeFilter, els.colorFilter]) {
-      el.addEventListener("input", applyFilters);
-      el.addEventListener("change", applyFilters);
-    }
+      for (const el of [
+        els.searchInput,
+        els.supportFilter,
+        els.typeFilter,
+        els.colorFilter,
+      ]) {
+        el.addEventListener("input", applyFilters);
+        el.addEventListener("change", applyFilters);
+      }
 
-    loadData();
-  </script>
-</body>
+      loadData();
+    </script>
+  </body>
 </html>
