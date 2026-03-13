@@ -72,6 +72,9 @@ def normalize_driver_id(driver_id):
 
 
 def simplify_driver_name(driver_id):
+    if not isinstance(driver_id, str):
+        return "unknown"
+    driver_id = driver_id.strip()
     if not driver_id:
         return "unknown"
     return driver_id.split("/", 1)[-1].lower()
